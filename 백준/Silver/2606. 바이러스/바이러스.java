@@ -1,100 +1,45 @@
-import java.util.Scanner;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
+// code from chatGPT
 
-class Main {
+import java.util.*;
 
-    static class Group {
-        
-        ArrayList<Set<Integer>> groups = new ArrayList<Set<Integer>>();
-        Set<Integer> answerGroup = new HashSet<Integer>();
-    
-        boolean inGroup(int com) {
-        
-            for (Set<Integer> group: groups) {
-            
-                if (group.contains(com) == true)
-                    return true;
-            }
-            return false;
-        }
-        
-        ArrayList<Integer> getGroup(int com) {
-    
-            ArrayList<Integer> idx = new ArrayList<Integer>();
-            
-            int groupnum = groups.size();
-            
-            for (int i = 0; i < groupnum; i++) {
-                
-                if (groups.get(i).contains(com) == true)
-                    idx.add(i);
-            }
-            return idx;
-        }
+public class Main {
 
-        void answerGroupDFS(int target, boolean[] visitedGroup) {
+    static ArrayList<ArrayList<Integer>> graph = new ArrayList<>();
+    static boolean[] visited;
+    static int count = 0;
 
-            ArrayList<Integer> idx = getGroup(target);
-
-            for (int i = 0; i < idx.size(); i++) {
-
-                int groupCursor = idx.get(i);
-            
-                if (visitedGroup[groupCursor] == false) {
-
-                    visitedGroup[groupCursor] = true;
-                
-                    for (int com : groups.get(groupCursor)) {
-
-                        answerGroup.add(com);
-                        answerGroupDFS(com, visitedGroup);
-                    }
-                }
-            }
-        }
-    }
-    
-    public static void main(String args[]) {
-        
+    public static void main(String[] args) {
         Scanner in = new Scanner(System.in);
-
-        Group treatGroup = new Group();
-        
         int computer = in.nextInt();
-        int links = in.nextInt();
-        
-        treatGroup.groups.add(new HashSet<Integer>());
-        
-        for (int i = 0; i < links; i++) {
-            
-            int com1 = in.nextInt();
-            int com2 = in.nextInt();
-            
-            if (treatGroup.inGroup(com1) == true) {
-                
-                ArrayList<Integer> idx = treatGroup.getGroup(com1);
-                treatGroup.groups.get(idx.get(0)).add(com2);
-            }
-            else if (treatGroup.inGroup(com2) == true) {
-                
-                ArrayList<Integer> idx = treatGroup.getGroup(com2);
-                treatGroup.groups.get(idx.get(0)).add(com1);
-            }
-            else {
-                Set<Integer> newGroup = new HashSet<Integer>();
-                
-                newGroup.add(com1);
-                newGroup.add(com2);
-                
-                treatGroup.groups.add(newGroup);
-            }
+        int link = in.nextInt();
+
+        // 그래프 초기화
+        for (int i = 0; i <= computer; i++) {
+            graph.add(new ArrayList<>());
         }
 
-        boolean[] visitedGroup = new boolean[treatGroup.groups.size()];
-        treatGroup.answerGroupDFS(1, visitedGroup);
-        
-        System.out.print(treatGroup.answerGroup.size() > 0? treatGroup.answerGroup.size() - 1 : 0);
+        // 간선 입력
+        for (int i = 0; i < link; i++) {
+            int a = in.nextInt();
+            int b = in.nextInt();
+            graph.get(a).add(b);
+            graph.get(b).add(a);  // 양방향 연결
+        }
+
+        visited = new boolean[computer + 1];
+        dfs(1);  // 1번 컴퓨터부터 시작
+
+        System.out.println(count - 1);  // 1번 제외한 감염 컴퓨터 수
+    }
+
+    static void dfs(int node) {
+        visited[node] = true;
+        count++;
+
+        for (int next : graph.get(node)) {
+            if (!visited[next]) {
+                dfs(next);
+            }
+        }
     }
 }
